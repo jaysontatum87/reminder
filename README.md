@@ -1,0 +1,2 @@
+# reminder
+programming by golang
