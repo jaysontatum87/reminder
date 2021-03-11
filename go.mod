@@ -1,3 +1,3 @@
-module github.com/jaysontatum87/reminder
+module server
 
 go 1.15

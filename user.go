@@ -1,6 +1,9 @@
 package main
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 type User struct {
 	Name   string
@@ -48,9 +51,39 @@ func (this *User) Offline() {
 	this.server.BroadCast(this, "已上线")
 
 }
-
+func (this *User) sendMsg(msg string) {
+	this.conn.Write([]byte(msg))
+}
 func (this *User) DoMessage(msg string) {
-	this.server.BroadCast(this, msg)
+	//Lock
+	if msg == "test" {
+		this.server.mapLock.Lock()
+		for k, v := range this.server.OnlineMap {
+			onlineMsg := "key:" + k + "[" + v.Addr + "]" + v.Name + ":" + "在线...\n"
+			this.sendMsg(onlineMsg)
+		}
+		this.server.mapLock.Unlock()
+	} else if len(msg) > 7 && msg[:7] == "rename|" {
+		newname := msg[8:] //???
+
+		_, ok := this.server.OnlineMap[newname]
+		if ok {
+			fmt.Println("this name (key) had already existed\n")
+			this.sendMsg("this name (key) had already existed")
+		} else {
+			//delete and create
+			this.server.mapLock.Lock()
+			delete(this.server.OnlineMap, newname)
+			this.server.OnlineMap[newname] = this
+			this.Name = newname
+			this.server.mapLock.Unlock()
+
+			this.sendMsg("this new name:" + newname)
+
+		}
+	} else {
+		this.server.BroadCast(this, msg)
+	}
 }
 
 //监听当前User channel的 方法,一旦有消息，就直接发送给对端客户端

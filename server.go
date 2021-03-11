@@ -87,7 +87,7 @@ func (this *Server) Handler(conn net.Conn) {
 	}()
 
 	//当前handler阻塞
-	select {}
+	select {} //select
 
 }
 
