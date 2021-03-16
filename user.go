@@ -81,6 +81,27 @@ func (this *User) DoMessage(msg string) {
 			this.sendMsg("this new name:" + newname)
 
 		}
+	}else if len(msg) >4 &&msg[:3]=="to|"{
+		//1 获取对方的用户名
+		name :=string.Split(msg,"|")[1]
+		if name ==""{
+			this.SendMsg("name null")
+			return
+		}
+
+		//2 根据用户名 得到对方User对象
+		value,ok:=this.server.OnlineMap[name]
+		//value :=this.server.OnlineMap[name] if value==""{}????
+		if !ok{
+			this.SendMsg("value null")
+			return		
+		}
+
+		//3 获取消息内容，通过对方的User对象将消息内容发送过去
+
+		content := string.Split(msg,"|")[2]
+		//value = user
+		value.SendMsg("from "+this.Name+" msg: "+content)
 	} else {
 		this.server.BroadCast(this, msg)
 	}
