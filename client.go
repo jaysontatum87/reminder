@@ -50,7 +50,7 @@ var serverPort int
 //./client -ip 127.0.0.1 -port 8888
 func init() {
 	flag.StringVar(&serverIp, "ip", "127.0.0.1", "设置服务器IP地址(默认是127.0.0.1)")
-	flag.IntVar(&serverPort, "port", 8888, "设置服务器端口(默认是8888)")
+	flag.IntVar(&serverPort, "port", 9000, "设置服务器端口(默认是8888)")
 }
 
 func main() {
@@ -74,7 +74,7 @@ func main() {
 
 func (client *Client) Run() {
 	for client.flag != 0 {
-		for client.menu() != true {
+		for client.menu() == true {
 			switch client.flag {
 			case 1:
 				//公聊模式
@@ -115,7 +115,7 @@ func (client *Client) menu() bool {
 
 //查询在线用户
 func (client *Client) SelectUsers() {
-	sendMsg := "who\n"
+	sendMsg := "test\n"
 	_, err := client.conn.Write([]byte(sendMsg))
 	if err != nil {
 		fmt.Println("conn Write err:", err)
@@ -125,27 +125,73 @@ func (client *Client) SelectUsers() {
 
 //私聊模式
 func (client *Client) PrivateChat() {
+	fmt.Println(">>>>PrivateChat:")
 	var remoteName string
 	var chatMsg string
 
-	// client.SelectUsers()
+	client.SelectUsers()
 	fmt.Println(">>>>请输入聊天对象[用户名], exit退出:")
 	fmt.Scanln(&remoteName)
 
+	for remoteName != "exit" {
+		fmt.Println(">>>>请输入消息内容, exit退出:")
+		fmt.Scanln(&chatMsg)
+
+		for chatMsg != "exit" {
+			//消息不为空则发送
+			if len(chatMsg) != 0 {
+				sendMsg := "to|" + remoteName + "|" + chatMsg + "\n\n"
+				_, err := client.conn.Write([]byte(sendMsg))
+				if err != nil {
+					fmt.Println("conn Write err:", err)
+					break
+				}
+			}
+
+			chatMsg = ""
+			fmt.Println(">>>>请输入消息内容, exit退出:")
+			fmt.Scanln(&chatMsg)
+		}
+
+		client.SelectUsers()
+		fmt.Println(">>>>请输入聊天对象[用户名], exit退出:")
+		fmt.Scanln(&remoteName)
+	}
 }
 
 func (client *Client) PublicChat() {
 	//提示用户输入消息
-	var chatMsg string
+	var charMsg string
+	fmt.Println(">>>>PublicChat: if exit, return")
+	fmt.Scanln(&charMsg)
+	for charMsg != "exit" {
+		//消息不为空则发送
+		if len(charMsg) != 0 {
+			sendMsg := charMsg + "\n"
+			_, err := client.conn.Write([]byte(sendMsg))
+			if err != nil {
+				fmt.Println("conn Write err:", err)
+				break
+			}
+		}
 
-	fmt.Println(">>>>请输入聊天内容，exit退出.")
-	fmt.Scanln(&chatMsg)
+		charMsg = ""
+		fmt.Println(">>>>请输入聊天内容，exit退出.")
+		fmt.Scanln(&charMsg)
+	}
 
 }
 
 func (client *Client) UpdateName() bool {
 
-	fmt.Println(">>>>请输入用户名:")
+	fmt.Println(">>>>UpdateName:")
 	fmt.Scanln(&client.Name)
 
+	sendMsg := "rename|" + client.Name + "\n" ////server.go 提取用户的消息(去除'\n')
+	_, err := client.conn.Write([]byte(sendMsg))
+	if err != nil {
+		fmt.Println("conn Write err:", err)
+		return false
+	}
+	return true
 }

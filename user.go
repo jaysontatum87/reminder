@@ -52,6 +52,8 @@ func (this *User) Offline() {
 	this.server.BroadCast(this, "ONLINE")
 
 }
+
+//
 func (this *User) sendMsg(msg string) {
 
 	fmt.Println("sendMsg")
