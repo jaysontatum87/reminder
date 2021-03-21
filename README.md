@@ -15,9 +15,7 @@ V8 私聊
 
 
 20210321
-
-V9~finished
-
+V1～V8 review
 如果不加
 func (this *Server) ListenMessager() 
 会出现无法接受client的信息的错误
@@ -26,3 +24,10 @@ func (this *Server) ListenMessager()
 to|name|msg
 2 rename
 rename|name
+
+
+20210321
+V9~finished
+
+1.scan input from stdout
+fmt.Scanln(&client.Name)

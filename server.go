@@ -42,6 +42,7 @@ func (this *Server) BroadCast(user *User, msg string) {
 }
 
 //对应一个客户端
+//server->client by read msg
 func (this *Server) Handler(conn net.Conn) {
 	//...当前链接的业务
 	fmt.Println("链接建立成功")
@@ -141,7 +142,7 @@ func (this *Server) ListenMessager() {
 		//将msg发送给全部的在线User
 		this.mapLock.Lock()
 		for _, cli := range this.OnlineMap {
-			cli.C <- msg //SEND *user C
+			cli.C <- msg //SEND *user C goroutine write msg to client by user'C channel
 		}
 		this.mapLock.Unlock()
 	}
